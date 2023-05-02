@@ -1,0 +1,56 @@
+[
+    {
+        "id": "d083105e39f8ba68",
+        "type": "debug",
+        "z": "614c1c00b0cf1810",
+        "name": "Load shedding",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 340,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "1d3e18f144e4911a",
+        "type": "debug",
+        "z": "614c1c00b0cf1810",
+        "name": "Schedule and events",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "854cb9223eb1d95f",
+        "type": "eskomsepush",
+        "z": "614c1c00b0cf1810",
+        "name": "",
+        "licensekey": "",
+        "area": "capetown-3-helderbergvillage",
+        "statusselect": "capetown",
+        "test": false,
+        "x": 130,
+        "y": 80,
+        "wires": [
+            [
+                "d083105e39f8ba68"
+            ],
+            [
+                "1d3e18f144e4911a"
+            ]
+        ]
+    }
+]
