@@ -19,13 +19,13 @@
   "license": "MIT",
   "node-red": {
     "nodes": {
-      "eskomepush": "./src/nodes/eskomsepush.js"
+      "eskomsepush": "./src/nodes/eskomsepush.js"
     },
     "version": ">=3.0.2"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dirkjanfaber/node-red-contrib-eskomepush"
+    "url": "https://github.com/dirkjanfaber/node-red-contrib-eskomsepush"
   },
   "dependencies": {
     "axios": "^1.3.5"
