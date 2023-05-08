@@ -116,8 +116,8 @@ module.exports = function (RED) {
       if (Object.keys(LoadShedding.schedule.next).length === 0) {
         const s = Schedule.schedule.days[1].stages[stage - 1][0]
         LoadShedding.schedule.next = {
-          start: Date.parse(Schedule.schedule.days[1].date + s.split('-')[0]),
-          end: Date.parse(Schedule.schedule.days[1].date + s.split('-')[1])
+          start: Date.parse(Schedule.schedule.days[1].date + ' ' + s.split('-')[0]),
+          end: Date.parse(Schedule.schedule.days[1].date + ' ' + s.split('-')[1])
         }
       }
       LoadShedding.event.next = {
@@ -132,6 +132,7 @@ module.exports = function (RED) {
 
       if (!LoadShedding.schedule.next.start || !LoadShedding.event.next.start) {
         node.warn('Unable to find next scheduled event and/or schedule')
+        node.warn(LoadShedding)
         return
       }
       if (LoadShedding.schedule.next.start <= LoadShedding.event.next.start) {
