@@ -106,7 +106,7 @@ module.exports = function (RED) {
             end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
           }
         }
-        if (Object.keys(LoadShedding.schedule.next).length === 0 && nowtime < schedule.split('-')[0]) {
+        if (nowtime < schedule.split('-')[0]) {
           LoadShedding.schedule.next = {
             start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
             end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
@@ -116,8 +116,8 @@ module.exports = function (RED) {
       if (Object.keys(LoadShedding.schedule.next).length === 0) {
         const s = Schedule.schedule.days[1].stages[stage - 1][0]
         LoadShedding.schedule.next = {
-          start: Date.parse(Schedule.sschedule.days[1].date + s.split('-')[0]),
-          end: Date.parse(Schedule.sschedule.days[1].date + s.split('-')[1])
+          start: Date.parse(Schedule.schedule.days[1].date + s.split('-')[0]),
+          end: Date.parse(Schedule.schedule.days[1].date + s.split('-')[1])
         }
       }
       LoadShedding.event.next = {
