@@ -2,7 +2,7 @@
 
 ![EskomsePush API](img/eskomsepush-flow.png)
 
-A node for retrieving info from the EskomSePush API.
+A node for retrieving info from the [EskomSePush API](https://eskomsepush.gumroad.com/l/api).
 
 The EskomSePush-API node gives the tools to make working with the load shedding in South Africa as easy as possible.
 
@@ -12,9 +12,17 @@ Once deployed, the node will fetch the data from EskomSePush every hour. As ever
 
 Internally the node checks every minute if a schedule is currently active or not. It will also output a message on the first deployment.
 
+![EskomsePush Victron MinSOC](img/eskomsepush-victron-minsoc.png)
+
+The node has been made to work well together with the [@victronenergy/node-red-contrib-victron](https://flows.nodered.org/node/@victronenergy/node-red-contrib-victron) nodes. One of the main once being the
+ESS control node for setting the MinSoc, based on the currently active stage. You can find the
+example flow for this via importing the [victron-minsoc-stage-based.json](examples/victron-minsoc-stage-based.json) example.
+
 ### Configuration
 
 First you will need a _licence key_. You can get one from [here](https://eskomsepush.gumroad.com/l/api), by subsribing to the Free model. Note that this is for personal use only.
+
+![EskomsePush configuration](img/eskomsepush-configuration.png)
 
 Next you need to insert the correct area. Once you entered 5 characters (and a valid license is used), the API will be used for searching the correct area. Do note that this will cost some of the daily queries. If you don't want that and you already know the id of the area, fill out the area first and then the license key.
 

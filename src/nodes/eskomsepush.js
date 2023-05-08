@@ -8,16 +8,15 @@ module.exports = function (RED) {
   let lastStatusUpdate = new Date()
   let lastStageUpdate = new Date()
   let lastScheduleUpdate = new Date()
-  let LoadShedding = false
   let fill = 'green'
   let shape = 'ring'
-  
+
   function checkAllowance (node) {
     const options = {}
     const headers = { token: node.config.licensekey }
     axios.get('https://developer.sepush.co.za/business/2.0/api_allowance',
       { params: options, headers }).then(function (response) {
-        EskomSePushAPI = response.data
+      EskomSePushAPI = response.data
     })
       .catch(error => {
         node.warn({ error: error.message })
@@ -29,7 +28,7 @@ module.exports = function (RED) {
     const headers = { token: node.config.licensekey }
     axios.get('https://developer.sepush.co.za/business/2.0/status',
       { params: options, headers }).then(function (response) {
-        Stage = response.data
+      Stage = response.data
     })
       .catch(error => {
         node.warn({ error: error.message })
@@ -39,22 +38,22 @@ module.exports = function (RED) {
   function checkSchedule (node) {
     const options = { id: node.config.area }
     const headers = { token: node.config.licensekey }
-    let url = 'https://developer.sepush.co.za/business/2.0/area'
+    const url = 'https://developer.sepush.co.za/business/2.0/area'
     if (node.config.test) {
       options.test = 'current'
     }
     axios.get(url,
       { params: options, headers }).then(function (response) {
-        Schedule = response.data
-        Schedule.info.area = node.config.area
+      Schedule = response.data
+      Schedule.info.area = node.config.area
     })
       .catch(error => {
         node.warn({ error: error.message })
       })
   }
 
-  function updateStatus(node) {
-    const now = new Date();
+  function updateStatus (node) {
+    const now = new Date()
     let statusText = ''
 
     if (EskomSePushAPI === null || (now.getTime() - lastStatusUpdate.getTime()) > 600000) {
@@ -70,25 +69,24 @@ module.exports = function (RED) {
       statusText += 'API quota reached'
       fill = 'red'
       shape = 'dot'
-
     } else {
-      if (Stage === null || (now.getTime() - lastStatusUpdate.getTime()) > 3600000) {
-        node.status({fill: 'yellow', shape, text: 'Fetching status'})
+      if (Stage === null || (now.getTime() - lastStageUpdate.getTime()) > 3600000) {
+        node.status({ fill: 'yellow', shape, text: 'Fetching stage' })
         checkStage(node)
         lastStageUpdate = now
       }
 
       if (Schedule === null || (now.getTime() - lastScheduleUpdate.getTime()) > 3600000) {
-        node.status({fill: 'yellow', shape, text: 'Fetching schedule'})
+        node.status({ fill: 'yellow', shape, text: 'Fetching schedule' })
         checkSchedule(node)
         lastScheduleUpdate = now
       }
-    }  
+    }
 
     if (Stage && Schedule && EskomSePushAPI) {
-      let stage = Stage.status[node.config.statusselect].stage
-      let nowtime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit'})
-      let LoadShedding = {
+      const stage = Stage.status[node.config.statusselect].stage
+      const nowtime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+      const LoadShedding = {
         schedule: {
           next: {},
           active: false
@@ -100,15 +98,15 @@ module.exports = function (RED) {
         checked: nowtime
       }
       fill = 'green'
-      for (let schedule of Schedule.schedule.days[0].stages[stage-1]) {
-        if ( nowtime >= schedule.split('-')[0] && nowtime <= schedule.split('-')[1] ) {
+      for (const schedule of Schedule.schedule.days[0].stages[stage - 1]) {
+        if (nowtime >= schedule.split('-')[0] && nowtime <= schedule.split('-')[1]) {
           LoadShedding.schedule = {
             active: true,
             start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
             end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
           }
         }
-        if ( Object.keys(LoadShedding.schedule.next).length === 0 && nowtime < schedule.split('-')[0] ) {
+        if (Object.keys(LoadShedding.schedule.next).length === 0 && nowtime < schedule.split('-')[0]) {
           LoadShedding.schedule.next = {
             start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
             end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
@@ -116,7 +114,7 @@ module.exports = function (RED) {
         }
       }
       if (Object.keys(LoadShedding.schedule.next).length === 0) {
-        let s = Schedule.schedule.days[1].stages[stage-1][0]
+        const s = Schedule.schedule.days[1].stages[stage - 1][0]
         LoadShedding.schedule.next = {
           start: Date.parse(Schedule.sschedule.days[1].date + s.split('-')[0]),
           end: Date.parse(Schedule.sschedule.days[1].date + s.split('-')[1])
@@ -126,14 +124,14 @@ module.exports = function (RED) {
         start: Date.parse(Schedule.events[0].start),
         end: Date.parse(Schedule.events[0].end)
       }
-      if ( nowtime >= LoadShedding.event.start && nowtime < LoadShedding.event.end ) {
+      if (nowtime >= LoadShedding.event.start && nowtime < LoadShedding.event.end) {
         LoadShedding.event.active = true
         LoadShedding.start = LoadShedding.event.start
         LoadShedding.end = LoadShedding.event.end
       }
 
       if (!LoadShedding.schedule.next.start || !LoadShedding.event.next.start) {
-        node.warn("Unable to find next scheduled event and/or schedule")
+        node.warn('Unable to find next scheduled event and/or schedule')
         return
       }
       if (LoadShedding.schedule.next.start <= LoadShedding.event.next.start) {
@@ -144,14 +142,15 @@ module.exports = function (RED) {
         LoadShedding.next.type = 'event'
       }
 
+      statusText += 'Stage '+stage
       LoadShedding.active = (LoadShedding.schedule.active || LoadShedding.event.active)
       if (LoadShedding.active) {
-        statusText += 'Until: '+ new Date(LoadShedding.end).toLocaleTimeString()
+        statusText += ' - ' + new Date(LoadShedding.end).toLocaleTimeString()
         fill = 'red'
       } else {
-        statusText += 'Next: ' + new Date(LoadShedding.next.start).toLocaleTimeString()
+        statusText += ' - ' + new Date(LoadShedding.next.start).toLocaleTimeString()
       }
-      node.send([{ 
+      node.send([{
         payload: LoadShedding.active,
         LoadShedding,
         stage,
@@ -164,7 +163,8 @@ module.exports = function (RED) {
         }
       }, {
         stage: Stage,
-        schedule: Schedule }])
+        schedule: Schedule
+      }])
     }
 
     if (EskomSePushAPI) {
@@ -172,7 +172,7 @@ module.exports = function (RED) {
     }
 
     node.status({
-      fill, shape, text: ( statusText || 'Ok' )
+      fill, shape, text: (statusText || 'Ok')
     })
   }
 
