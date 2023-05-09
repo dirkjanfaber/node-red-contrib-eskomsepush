@@ -146,7 +146,7 @@ module.exports = function (RED) {
       statusText += 'Stage '+stage
       LoadShedding.active = (LoadShedding.schedule.active || LoadShedding.event.active)
       if (LoadShedding.active) {
-        statusText += ' - ' + new Date(LoadShedding.end).toLocaleTimeString()
+        statusText += ' - ' + new Date(LoadShedding.next.end).toLocaleTimeString()
         fill = 'red'
       } else {
         statusText += ' - ' + new Date(LoadShedding.next.start).toLocaleTimeString()
