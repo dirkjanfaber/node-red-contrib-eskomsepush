@@ -16,7 +16,7 @@ Internally the node checks every minute if a schedule is currently active or not
 
 The node has been made to work well together with the [@victronenergy/node-red-contrib-victron](https://flows.nodered.org/node/@victronenergy/node-red-contrib-victron) nodes. One of the main ones being the
 ESS control node for setting the MinSoc, based on the currently active stage. You can find the
-example flow for this via importing the [victron-minsoc-stage-based.json](examples/victron-minsoc-stage-based.json) example.
+example flow for this via importing the [victron-minsoc-stage-based.json](examples/victron-minsoc-stage-based.json) file.
 
 ### Configuration
 
