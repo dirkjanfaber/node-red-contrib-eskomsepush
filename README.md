@@ -35,7 +35,7 @@ If you don't want to use API quota by searching, and you already know the id of 
 
 To fetch the area id manually, make an `areas_search` API call using your API license key `token`, a word of search `text`.  In the response returned by the API, copy the `id` value of the matching area.
 
-In the example below (on MacOS), `curl` is used to query the API and the search text value is 'ballito' (the license key token is invlaid and must be replaced with a valid key).  The area id value that will be used from this example is `eskmo-15-ballitokwadukuzakwazulunatal`:
+In the example below (on MacOS), `curl` is used to query the API and the search text value is 'ballito' (the license key token is invalid and must be replaced with a valid key).  The area id value that will be used from this example is `eskmo-15-ballitokwadukuzakwazulunatal`:
 
 ```
 % curl --location --request GET 'https://developer.sepush.co.za/business/2.0/areas_search?text=ballito' --header 'token: 2DFB82AC-46254F6E-A68B26A4-8DF1303E'
