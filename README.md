@@ -20,7 +20,9 @@ The node has been made to work well together with the [@victronenergy/node-red-c
 
 You can find the example flow for this via importing the [victron-minsoc-stage-based.json](examples/victron-minsoc-stage-based.json) file.
 
-### Configuration
+### Installation & Configuration
+
+Install the node from within Node-RED from the menu: Manage pallete -> Install (tab) -> Search for "eskom" and click "install".
 
 First you will need a _licence key_. You can get one from [here](https://eskomsepush.gumroad.com/l/api), by subscribing to the Free model. Note that this is for personal use only.
 
