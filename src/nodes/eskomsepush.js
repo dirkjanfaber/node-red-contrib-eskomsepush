@@ -10,13 +10,12 @@ module.exports = function (RED) {
   let lastStageUpdate = new Date()
   let lastScheduleUpdate = new Date()
 
-
-  function updateStatus(node) {
+  function updateStatus (node) {
     let fill = 'green'
     let shape = 'ring'
     let statusText = ''
     if (Stage && Stage.status && Stage.status[node.config.statusselect].stage) {
-      statusText += 'Stage '+Stage.status[node.config.statusselect].stage
+      statusText += 'Stage ' + Stage.status[node.config.statusselect].stage
     }
     if (LoadShedding && LoadShedding.active && LoadShedding.next && LoadShedding.next.end) {
       statusText += ' - ' + new Date(LoadShedding.next.end).toLocaleTimeString()
@@ -32,7 +31,7 @@ module.exports = function (RED) {
     if (EskomSePushAPI) {
       statusText += ` (API: ${EskomSePushAPI.allowance.count}/${EskomSePushAPI.allowance.limit})`
       if (EskomSePushAPI.allowance.count >= EskomSePushAPI.allowance.limit) {
-        fill = 'red'    
+        fill = 'red'
       }
     }
     node.status({
@@ -130,15 +129,29 @@ module.exports = function (RED) {
           LoadShedding.schedule = {
             active: true
           }
-          LoadShedding.schedule.next = {
-            start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
-            end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
+          if (schedule.split('-')[0] < schedule.split('-')[1]) {
+            LoadShedding.schedule.next = {
+              start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
+              end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
+            }
+          } else {
+            LoadShedding.schedule.next = {
+              start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
+              end: Date.parse(Schedule.schedule.days[1].date + ' ' + schedule.split('-')[1])
+            }
           }
         }
         if (nowtime < schedule.split('-')[0]) {
-          LoadShedding.schedule.next = {
-            start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
-            end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
+          if (schedule.split('-')[0] < schedule.split('-')[1]) {
+            LoadShedding.schedule.next = {
+              start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
+              end: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[1])
+            }
+          } else {
+            LoadShedding.schedule.next = {
+              start: Date.parse(Schedule.schedule.days[0].date + ' ' + schedule.split('-')[0]),
+              end: Date.parse(Schedule.schedule.days[1].date + ' ' + schedule.split('-')[1])
+            }
           }
         }
       }
@@ -171,6 +184,9 @@ module.exports = function (RED) {
         LoadShedding.next = LoadShedding.event.next
         LoadShedding.next.type = 'event'
       }
+
+      LoadShedding.next.duration = (LoadShedding.next.end - LoadShedding.next.start) / 1000
+      LoadShedding.next.islong = LoadShedding.next.duration >= (4 * 3600)
 
       LoadShedding.active = (LoadShedding.schedule.active || LoadShedding.event.active)
       if (LoadShedding.schedule.active) {
@@ -236,6 +252,25 @@ module.exports = function (RED) {
 
     res.setHeader('Content-Type', 'application/json')
     axios.get('https://developer.sepush.co.za/business/2.0/areas_search',
+      { params: options, headers }).then(function (response) {
+      return res.send(response.data)
+    })
+      .catch(error => {
+        return res.send({ error: error.message })
+      })
+  })
+  RED.httpNode.get('/eskomsepush/api', (req, res) => {
+    if (!req.query.token) {
+      res.setHeader('Content-Type', 'application/json')
+      return res.send('invalid')
+    }
+    const headers = {
+      token: req.query.token
+    }
+    const options = {}
+
+    res.setHeader('Content-Type', 'application/json')
+    axios.get('https://developer.sepush.co.za/business/2.0/api_allowance',
       { params: options, headers }).then(function (response) {
       return res.send(response.data)
     })
