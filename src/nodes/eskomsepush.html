@@ -15,6 +15,9 @@
                 },
                 success: function(response) {
                     $('#api_info').text(response.allowance.count + '/' + response.allowance.limit)
+                    if (response.allowance.count >= response.allowance.limit) {
+                        document.getElementById("searchAreaText").disabled = true
+                    }
                 },
                 error: function(error) {
                     node.warn(error)
@@ -51,7 +54,7 @@
                 var search = $("input#searchAreaText").val()
                 var arealist = ''
 
-                if (isValid) {
+                if (isValid && search != '') {
                     $.ajax({
                         url: '/eskomsepush/search',
                         method: 'GET',
