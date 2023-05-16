@@ -1,4 +1,30 @@
 <script type="text/javascript">
+    function checkForValidLicense() {
+        var licensekey = $('#node-input-licensekey').val();
+
+        var regexValidator = RED.validators.regex(/^[0-9A-F\-]{35}$/)
+        var isValid = regexValidator(licensekey)
+
+        if (isValid) {
+            document.getElementById("searchAreaText").disabled = false
+            $.ajax({
+                url: '/eskomsepush/api',
+                method: 'GET',
+                data: {
+                    token: licensekey,
+                },
+                success: function(response) {
+                    $('#api_info').text(response.allowance.count + '/' + response.allowance.limit)
+                },
+                error: function(error) {
+                    node.warn(error)
+                }
+            })
+        } else {
+            document.getElementById("searchAreaText").disabled = true
+        }
+    }
+
     RED.nodes.registerType('eskomsepush',{
         category: 'network',
         color: '#ffffff',
@@ -16,53 +42,48 @@
             return this.name||"EskomSePush API";
         },
         oneditprepare: function oneditprepare() {
+            checkForValidLicense()
 
+            $("button#searchAreaId").on("click", function() {
+                var licensekey = $("#node-input-licensekey").val()
+                var regexValidator = RED.validators.regex(/^[0-9A-F\-]{35}$/)
+                var isValid = regexValidator(licensekey)
+                var search = $("input#searchAreaText").val()
+                var arealist = ''
+
+                if (isValid) {
+                    $.ajax({
+                        url: '/eskomsepush/search',
+                        method: 'GET',
+                        data: {
+                            token: licensekey,
+                            search
+                        },
+                        success: function(response) {
+                            for (var i = 0; i < response.areas.length; i++) {
+                                arealist += '<li id="' + response.areas[i].id + '">' + response.areas[i].name +
+                                    ', '+ response.areas[i].region + '</li>'
+                            }
+                            $('#list-areas').html(arealist)
+                            $('#list-areas li').on('click', function() {
+                                $('#node-input-area').val($(this).attr("id"))
+                                $('#node-input-name').val($(this).text().split(',')[0])
+                            })
+                            checkForValidLicense()
+                        },
+                        error: function(error) {
+                            node.warn(error)
+                        }
+                    })
+                }
+            })
+
+            $("#node-input-licensekey").on("input", function() {
+                checkForValidLicense()
+            });
         }
     });
 
-    function searchArea() {
-        var input = document.getElementById("node-input-area");
-        var dropdown = document.getElementById("areaDropdown");
-        var licensekey = document.getElementById("node-input-licensekey");
-
-        if (!RED.validators.regex(licensekey.value, /^[0-9A-F\-]{35}$/)) {
-            return
-        }
-
-        if (input.value.length >= 5) {
-            dropdown.innerHTML = "";
-
-            $.ajax({
-                url: '/eskomsepush/search',
-                method: 'GET',
-                data: {
-                    token: licensekey.value,
-                    search: input.value
-                },
-                success: function(response) {
-                    for (var i = 0; i < response.areas.length; i++) {
-                        var option = document.createElement("option");
-                        option.text = response.areas[i].name;
-                        option.value = response.areas[i].id;
-                        dropdown.add(option);
-                    }
-                },
-                error: function(error) {
-                    node.warn(error)
-                }
-            })
-            dropdown.style.display = "block";
-            dropdown.addEventListener("change", function() {
-                input.value = dropdown.value;
-                dropdown.style.display = "none";
-            });
-            input.addEventListener("focusout", function() {
-                dropdown.style.display = "none"
-            })
-        } else {
-            dropdown.style.display = "none";
-        }
-    }
 </script>
 
 <script type="text/html" data-template-name="eskomsepush">
@@ -75,13 +96,8 @@
         <input type="password" id="node-input-licensekey" placeholder="License key" required>
     </div>
     <div class="form-row">
-        <label for="node-input-area"><i class="fa fa-tag"></i> Area</label>
-        <input type="text" id="node-input-area" placeholder="Area" onkeyup="searchArea()">
-        <select id="areaDropdown" style="display: none;"></select>
-    </div>
-    <div class="form-row">
-        <label style="min-width:190px" for="node-input-test"><i class="fa fa-volume-up"></i> Use test data</label>
-        <input type="checkbox" checked id="node-input-test" style="max-width:30px">
+        <label for="node-input-area"><i class="fa fa-tag"></i> Area id</label>
+        <input type="text" id="node-input-area" placeholder="Area id">
     </div>
     <div class="form-row">
         <label for="node-input-statusselect"><i class="fa fa-location-arrow"></i> Status select</label>
@@ -89,6 +105,27 @@
             <option value="eskom">National (eskom)</option>
             <option value="capetown">Cape Town</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label style="min-width:190px" for="node-input-test"><i class="fa fa-volume-up"></i> Use test data</label>
+        <input type="checkbox" checked id="node-input-test" style="max-width:30px">
+    </div>
+    <div class="form-tips">
+        <p>In order to fill out the properties, you will need to add the correct license key, which can be
+        obtained <a href="https://eskomsepush.gumroad.com/l/api">here</a>. Apart from that, the
+        <em>Aread id</em> needs to be filled out. The search form below can help you to obtain that.<br />
+        Once you have a valid licence key filled out in the form, a query willl be done, checking
+            how many credits you have left. If you have credits left, the form 
+            can be used to search for the needed area id. <strong>Each search will cost you 5 credits.</strong>
+        </p>
+
+        <ul id="list-areas"></ul>
+
+        <p>
+            Queries left: <span id="api_info">unknown/unknown</span><br />
+        <input type="text" id="searchAreaText" placeholder="Area" disabled />
+        <button id="searchAreaId">Search</button><br />
+    </p>
     </div>
 </script>
 
@@ -111,8 +148,7 @@ see how many queries you have left.</p>
 <h3 id="configuration">Configuration</h3>
 
 <p>First you will need a <em>licence key</em>. You can get one from <a href="https://eskomsepush.gumroad.com/l/api">here</a>, by subsribing to the Free model. Note that this is for personal use only.</p>
-<p>Next you need to insert the correct area. Once you entered 5 characters (and a valid license is used), the API will be used for searching the correct area. Do note that this will cost some of the daily queries. If you don&#39;t want that and you already know the id of the area, fill out the area first and then the license
-key.</p>
+<p>Next you need to insert the correct area. Once a valid license is filled out, the API can be used for searching the correct area id. Do note that this will cost some of the daily queries. If you don&#39;t want that and you already know the id of the area, fill out the area id manually.</p>
 <p>Then you need to fill out which status to follow. This can be either <em>National</em> (eskom) or <em>Capetown</em>.</p>
 <p>If the <em>test</em> checkbox has been selected, test data for the area will be fetched instead of the actual schedule. This is useful when debugging.</p>
 
@@ -122,47 +158,53 @@ key.</p>
 
 <pre>
 {
-  "payload":false,
-  "LoadShedding":{
-    "schedule":{
-       "next":{
-         "start":1683561600000,
-         "end":1683570600000,
-         "type":"schedule"
-       },
-       "active":false
+    "payload": false,
+    "LoadShedding": {
+        "schedule": {
+        "next": {
+            "start": 1684267200000,
+            "end": 1684276200000,
+            "type": "schedule",
+            "duration": 9000,
+            "islong": false
+        },
+        "active": false
+        },
+        "event": {
+        "next": {
+            "start": 1684267200000,
+            "end": 1684276200000
+        },
+        "active": false
+        },
+        "checked": "15:38",
+        "next": {
+        "start": 1684267200000,
+        "end": 1684276200000,
+        "type": "schedule",
+        "duration": 9000,
+        "islong": false
+        },
+        "active": false
     },
-    "event":{
-      "next":{
-        "start":1683561600000,
-        "end":1683570600000
-      },
-      "active":false
+    "stage": "3",
+    "statusselect": "capetown",
+    "api": {
+        "count": 45,
+        "limit": 50,
+        "lastStatusUpdate": "Tue May 16 2023 15:38:15 GMT+0200 (Central European Summer Time)",
+        "lastScheduleUpdate": "Tue May 16 2023 15:38:15 GMT+0200 (Central European Summer Time)"
     },
-    "checked":"13:35",
-    "next":{
-      "start":1683561600000,
-      "end":1683570600000,
-      "type":"schedule"
-    },
-    "active":false
-  },
-  "stage":"5",
-  "statusselect":"capetown",
-  "api":{
-    "count":12,
-    "limit":50,
-    "lastStatusUpdate":"Mon May 08 2023 13:34:30 GMT+0200 (Central European Summer Time)",
-    "lastScheduleUpdate":"Mon May 08 2023 13:34:30 GMT+0200 (Central European Summer Time)"
-  },
-  "_msgid":"6e77b593b7f9eda4"
-}
+    "_msgid": "dfa429a93a16472d"
+    }
 </pre>
 
-<p>The <tt>start</tt> and <tt>end</tt> objects contain the time as unix timestamp in the Javascript format (milliseconds after the epoch).</p>
+<p>The <tt>start</tt> and <tt>end</tt> objects contain the time as unix timestamp in the Javascript format (milliseconds after the epoch),
+    while the <tt>duration</tt> is in seconds. The <code>msg.LoadShedding.next.islong</code> value is boolean and will be <em>true</em> if the
+    shedding lasts 4 hours or longer.</p>
 
 <p>The second output shows <code>msg.stage</code> and <code>msg.schedule</code>, containing the latest information as retrieved from the API.
-This output is mainly useful when writing your own functions and logic.</p>
+This output is mainly useful when debugging or writing your own functions and logic.</p>
 
 <h3 id="status">Status</h3>
 
@@ -177,8 +219,9 @@ a matching <em>schedule</em>.
 </p>
 
 <h1 id="documentation">Documentation</h1>
-<p>Documentation for the API can be found <a href="https://documenter.getpostman.com/view/1296288/UzQuNk3E">here</a></p>
 
+<p>The GitHub site for the node can be found <a href="https://github.com/dirkjanfaber/node-red-contrib-eskomsepush">here</a>, while the documentation for the API can be found <a href="https://documenter.getpostman.com/view/1296288/UzQuNk3E">here</a>.
+For issues and/or suggestions for improving the node, please use the <a href="https://github.com/dirkjanfaber/node-red-contrib-eskomsepush/issues">issue tracker</a>.</p>
 </script>
 
 <style>
@@ -188,5 +231,8 @@ input#node-input-area {
 select#areaDropdown {
   position: absolute;
   left: 120px;
+}
+#list-areas li {
+  cursor: pointer;
 }
 </style>
