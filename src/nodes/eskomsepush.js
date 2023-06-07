@@ -14,8 +14,12 @@ module.exports = function (RED) {
     let fill = 'green'
     let shape = 'ring'
     let statusText = ''
+
+    if (node.config.verbose === true) {
+      node.warn('Running function updateStatus')
+    }
     if (Stage && Stage.status && Stage.status[node.config.statusselect].stage) {
-      statusText += 'Stage ' + Stage.status[node.config.statusselect].stage
+      statusText += 'Stage ' + (Stage.active || Stage.status[node.config.statusselect].stage)
     }
     if (LoadShedding && LoadShedding.active && LoadShedding.next && LoadShedding.next.end) {
       statusText += ' - ' + new Date(LoadShedding.next.end).toLocaleTimeString()
@@ -42,6 +46,10 @@ module.exports = function (RED) {
   function checkAllowance (node) {
     const options = {}
     const headers = { token: node.config.licensekey }
+
+    if (node.config.verbose === true) {
+      node.warn('Running function checkAllowance')
+    }
     axios.get('https://developer.sepush.co.za/business/2.0/api_allowance',
       { params: options, headers }).then(function (response) {
       EskomSePushAPI = response.data
@@ -55,6 +63,10 @@ module.exports = function (RED) {
   function checkStage (node) {
     const options = {}
     const headers = { token: node.config.licensekey }
+
+    if (node.config.verbose === true) {
+      node.warn('Running function checkStage')
+    }
     axios.get('https://developer.sepush.co.za/business/2.0/status',
       { params: options, headers }).then(function (response) {
       Stage = response.data
@@ -69,6 +81,10 @@ module.exports = function (RED) {
     const options = { id: node.config.area }
     const headers = { token: node.config.licensekey }
     const url = 'https://developer.sepush.co.za/business/2.0/area'
+
+    if (node.config.verbose === true) {
+      node.warn('Running function checkSchedule')
+    }
     if (node.config.test) {
       options.test = 'current'
     }
@@ -86,6 +102,9 @@ module.exports = function (RED) {
   function updateSheddingStatus (node) {
     const now = new Date()
 
+    if (node.config.verbose === true) {
+      node.warn('Running function updateSheddingStatus')
+    }
     if (EskomSePushAPI === null || (now.getTime() - lastStatusUpdate.getTime()) > 600000) {
       checkAllowance(node)
       lastStatusUpdate = now
@@ -111,7 +130,7 @@ module.exports = function (RED) {
     }
 
     if (Stage && Schedule && EskomSePushAPI) {
-      const stage = Stage.status[node.config.statusselect].stage
+      let stage = Stage.status[node.config.statusselect].stage
       const nowtime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
       LoadShedding = {
         schedule: {
@@ -124,10 +143,13 @@ module.exports = function (RED) {
         },
         checked: nowtime
       }
-      node.warn(Schedule)
-      node.warn(stage)
-      node.warn(Stage)
-      for (const schedule of Schedule.schedule.days[0].stages[stage - 1]) {
+
+      if (!Array.isArray(Schedule.schedule.days[0].stages[stage])) {
+        node.warn(`No schedule defined for stage ${stage}`)
+        return
+      }
+
+      for (const schedule of Schedule.schedule.days[0].stages[stage]) {
         if (nowtime >= schedule.split('-')[0] && nowtime <= schedule.split('-')[1]) {
           LoadShedding.schedule = {
             active: true
@@ -171,6 +193,12 @@ module.exports = function (RED) {
       }
       if (now >= LoadShedding.event.next.start && now < LoadShedding.event.next.end) {
         LoadShedding.event.active = true
+        if (Schedule.events[0].note.match(/Stage (\d+)/i)) {
+          stage = Schedule.events[0].note.match(/Stage (\d+)/i)[1]
+          Stage.active = stage
+        }
+      } else {
+        Stage.active = stage
       }
 
       if (!LoadShedding.schedule | !LoadShedding.schedule.next ||

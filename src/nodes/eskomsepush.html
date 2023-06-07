@@ -36,7 +36,8 @@
             licensekey: {value:"", validate: RED.validators.regex(/^[0-9A-F\-]{35}$/)},
             area: {value:""},
             statusselect: {value:"", validate: RED.validators.regex(/^(eskom|capetown)$/)},
-            test: { value: false }
+            test: { value: false },
+            verbose: {value: false}
         },
         inputs:0,
         outputs:2,
@@ -130,6 +131,10 @@
         <button id="searchAreaId">Search</button><br />
     </p>
     </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <input type="checkbox" checked id="node-input-verbose" style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;">
+        <label style="min-width:390px" for="node-input-verbose"><i class="fa fa-power"></i> Verbose: add extra logging when running</label>
+    </div>
 </script>
 
 <script type="text/html" data-help-name="eskomsepush">
@@ -216,7 +221,7 @@ This output is mainly useful when debugging or writing your own functions and lo
 how many are left. This updates every 10 minutes.</p>
 
 <p>
-The red color status can be either filled (dot) or not (ring). In case of a dot,
+The yellow color status can be either filled (dot) or not (ring). In case of a dot,
 the load schedding is because of an <em>event</em>. When it is a ring, it is caused by
 a matching <em>schedule</em>.
 </p>
