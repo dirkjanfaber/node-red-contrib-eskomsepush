@@ -221,6 +221,19 @@ the load schedding is because of an <em>event</em>. When it is a ring, it is cau
 a matching <em>schedule</em>.
 </p>
 
+<div id="legend">
+    <ul>
+        <li><svg class="bullet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="5" width="9" height="9" rx="2" ry="2" stroke-width="3" fill="#fff" stroke="#5a8"></rect>
+        </svg> - grid available, working properly</li>
+        <li><svg class="bullet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="5" width="9" height="9" rx="2" ry="2" stroke-width="3" fill="#F9DF31" stroke="#F9DF31"></rect>
+        </svg> - no grid, load shedding because of an <strong>event</strong></li>
+        <li><svg class="bullet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="5" width="9" height="9" rx="2" ry="2" stroke-width="3" fill="#fff" stroke="#F9DF31"></rect>
+        </svg> - no grid, load shedding because of a <strong>schedule</strong></li>
+        <li><svg class="bullet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="5" width="9" height="9" rx="2" ry="2" stroke-width="3" fill="#fff" stroke="#c00"></rect>
+        </svg> - ran out of API calls</li>
+    </ul>
+</div>
+
 <h1 id="documentation">Documentation</h1>
 
 <p>The GitHub site for the node can be found <a href="https://github.com/dirkjanfaber/node-red-contrib-eskomsepush">here</a>, while the documentation for the API can be found <a href="https://documenter.getpostman.com/view/1296288/UzQuNk3E">here</a>.
@@ -237,5 +250,22 @@ select#areaDropdown {
 }
 #list-areas li {
   cursor: pointer;
+}
+
+#legend ul {
+    list-style: none;
+    padding: 0;
+}
+#legend li {
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 25px;
+}
+.bullet {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    width: 35px;
+    height: 35px;
 }
 </style>

@@ -19,7 +19,7 @@ module.exports = function (RED) {
     }
     if (LoadShedding && LoadShedding.active && LoadShedding.next && LoadShedding.next.end) {
       statusText += ' - ' + new Date(LoadShedding.next.end).toLocaleTimeString()
-      fill = 'red'
+      fill = 'yellow'
       if (LoadShedding.type === 'event') {
         shape = 'dot'
       }
@@ -124,6 +124,9 @@ module.exports = function (RED) {
         },
         checked: nowtime
       }
+      node.warn(Schedule)
+      node.warn(stage)
+      node.warn(Stage)
       for (const schedule of Schedule.schedule.days[0].stages[stage - 1]) {
         if (nowtime >= schedule.split('-')[0] && nowtime <= schedule.split('-')[1]) {
           LoadShedding.schedule = {
