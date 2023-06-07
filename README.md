@@ -108,7 +108,7 @@ The status will show the situation regarding the API calls and when the next
 shedding wil start or end.  It also shows the count of API calls that have been
 done and how many are left. This updates every 10 minutes.
 
-The red color status can be either filled (dot) or not (ring). In case of a dot,
+The yellow color status can be either filled (dot) or not (ring). In case of a dot,
 the load schedding is because of an _event_. When it is a ring, it is caused by
 a matching _schedule_.
 
