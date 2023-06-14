@@ -2,7 +2,7 @@ module.exports = function (RED) {
   'use strict'
 
   const axios = require('axios')
-  let EskomSePushInfo = {
+  const EskomSePushInfo = {
     api: {
       lastUpdate: null,
       info: {}
@@ -18,13 +18,13 @@ module.exports = function (RED) {
     calc: {}
   }
 
-  function getMinutesLeftInDay() {
-    const currentDate = new Date();
-    const tomorrow = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1);
-    const timeDiff = tomorrow.getTime() - currentDate.getTime();
-    const minutesLeft = Math.floor(timeDiff / (1000 * 60));
+  function getMinutesLeftInDay () {
+    const currentDate = new Date()
+    const tomorrow = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+    const timeDiff = tomorrow.getTime() - currentDate.getTime()
+    const minutesLeft = Math.floor(timeDiff / (1000 * 60))
 
-    return minutesLeft;
+    return minutesLeft
   }
 
   function checkAllowance (node) {
@@ -57,7 +57,7 @@ module.exports = function (RED) {
     }
     axios.get('https://developer.sepush.co.za/business/2.0/status',
       { params: options, headers }).then(function (response) {
-      EskomSePushInfo.status.info  = response.data
+      EskomSePushInfo.status.info = response.data
       EskomSePushInfo.status.lastUpdate = new Date()
       // Call updateSheddingStatus again now we have new data
       updateSheddingStatus(node)
@@ -73,14 +73,14 @@ module.exports = function (RED) {
     const url = 'https://developer.sepush.co.za/business/2.0/area'
 
     if (node.config.verbose === true) {
-      node.warn('Running function checkArea')
+      node.warn('Running function checkArea after ' + (new Date() - EskomSePushInfo.area.lastUpdate) + ' seconds')
     }
     if (node.config.test) {
       options.test = 'current'
     }
     axios.get(url,
       { params: options, headers }).then(function (response) {
-      EskomSePushInfo.area.info  = response.data
+      EskomSePushInfo.area.info = response.data
       EskomSePushInfo.area.lastUpdate = new Date()
       // Call updateSheddingStatus again now we have new data
       updateSheddingStatus(node)
@@ -90,7 +90,7 @@ module.exports = function (RED) {
       })
   }
 
-  function updateSheddingStatus(node) {
+  function updateSheddingStatus (node) {
     const now = new Date()
 
     // Check allowance every ten minutes
@@ -100,7 +100,7 @@ module.exports = function (RED) {
 
     // If we don't have API info, we just return
     if (Object.entries(EskomSePushInfo.api.info).length === 0) {
-      node.warn("No API info (yet), refusing to continue")
+      node.warn('No API info (yet), refusing to continue')
       return
     }
 
@@ -112,15 +112,13 @@ module.exports = function (RED) {
 
     // Fetching actual information takes 2 calls, so calculate how long the day lasts and see how we
     // can divide the available calls over the day
-    EskomSePushInfo.calc.sleeptime = (getMinutesLeftInDay() / (( EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count ) / 2)).toFixed(0)
+    EskomSePushInfo.calc.sleeptime = (getMinutesLeftInDay() / ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0)
 
-    if (EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate ) > (EskomSePushInfo.calc.sleeptime * 60000)) {
-      node.warn("time to update the status")
+    if (EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
       checkStage(node)
     }
 
-    if (EskomSePushInfo.area.lastUpdate === null || (now.getTime() - EskomSePushInfo.area.lastUpdate ) > (EskomSePushInfo.calc.sleeptime * 60000)) {
-      node.warn("time to update the schedule")
+    if (EskomSePushInfo.area.lastUpdate === null || (now.getTime() - EskomSePushInfo.area.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
       checkArea(node)
     }
 
@@ -128,7 +126,7 @@ module.exports = function (RED) {
     if (EskomSePushInfo.api.lastUpdate === null ||
         EskomSePushInfo.status.lastUpdate === null ||
         EskomSePushInfo.area.lastUpdate === null) {
-      node.warn("Not enough info to continue.")
+      node.warn('Not enough info to continue.')
       return
     }
 
@@ -136,7 +134,7 @@ module.exports = function (RED) {
     EskomSePushInfo.calc.stage = EskomSePushInfo.status.info.status[node.config.statusselect].stage
 
     if (node.config.verbose === true) {
-      node.warn('API call status: '+EskomSePushInfo.api.info.allowance.count+'/'+EskomSePushInfo.api.info.allowance.limit)
+      node.warn('API call status: ' + EskomSePushInfo.api.info.allowance.count + '/' + EskomSePushInfo.api.info.allowance.limit)
       node.warn(EskomSePushInfo)
     }
 
@@ -146,8 +144,8 @@ module.exports = function (RED) {
     // Are there any events going on?
     if (Object.entries(EskomSePushInfo.area.info.events).length > 0) {
       EskomSePushInfo.calc.type = 'event'
-      let EventStart =  Date.parse(EskomSePushInfo.area.info.events[0].start)
-      let EventEnd = Date.parse(EskomSePushInfo.area.info.events[0].end)
+      const EventStart = Date.parse(EskomSePushInfo.area.info.events[0].start)
+      const EventEnd = Date.parse(EskomSePushInfo.area.info.events[0].end)
       if (now >= EventStart && now < EventEnd) {
         EskomSePushInfo.calc.active = true
         if (EskomSePushInfo.area.info.events[0].note.match(/Stage (\d+)/i)) {
@@ -168,8 +166,8 @@ module.exports = function (RED) {
     let BreakLoop = false
     for (const dates of EskomSePushInfo.area.info.schedule.days) {
       for (const schedule of dates.stages[EskomSePushInfo.calc.stage]) {
-        let ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0])
-        let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
+        const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0])
+        const ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
         if (now < ScheduleEnd) {
           BreakLoop = true
           // This schedule is either active or will be next
@@ -178,7 +176,7 @@ module.exports = function (RED) {
             EskomSePushInfo.calc.type = 'schedule'
             EskomSePushInfo.calc.start = ScheduleStart
             EskomSePushInfo.calc.end = ScheduleEnd
-        } else {
+          } else {
             EskomSePushInfo.calc.next = {
               type: 'schedule',
               start: ScheduleStart,
@@ -193,12 +191,12 @@ module.exports = function (RED) {
 
     if (EskomSePushInfo.calc.next) {
       EskomSePushInfo.calc.next.duration = (EskomSePushInfo.calc.next.end - EskomSePushInfo.calc.next.start) / 1000
-      EskomSePushInfo.calc.next.islong = EskomSePushInfo.calc.next.duration >= (4 * 3600)  
+      EskomSePushInfo.calc.next.islong = EskomSePushInfo.calc.next.duration >= (4 * 3600)
     }
 
     if (EskomSePushInfo.calc.active) {
       EskomSePushInfo.calc.duration = (EskomSePushInfo.calc.end - EskomSePushInfo.calc.start) / 1000
-      EskomSePushInfo.calc.islong = EskomSePushInfo.calc.duration >= (4 * 3600)  
+      EskomSePushInfo.calc.islong = EskomSePushInfo.calc.duration >= (4 * 3600)
     }
 
     if (node.config.verbose === true) {
@@ -215,7 +213,7 @@ module.exports = function (RED) {
         limit: EskomSePushInfo.api.info.allowance.limit
       },
       calc: EskomSePushInfo.calc
-      }, {
+    }, {
       stage: EskomSePushInfo.status.info,
       schedule: EskomSePushInfo.area.info
     }])
