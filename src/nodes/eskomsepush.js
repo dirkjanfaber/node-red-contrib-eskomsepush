@@ -53,7 +53,13 @@ module.exports = function (RED) {
     const headers = { token: node.config.licensekey }
 
     if (node.config.verbose === true) {
-      node.warn('Running function checkStage')
+      let warnstring = 'Running function checkStage'
+      if (EskomSePushInfo.status.lastUpdate === null) {
+        warnstring += ' - initial run'
+      } else {
+        warnstring += ' after ' + ((new Date() - EskomSePushInfo.status.lastUpdate)/60000).toFixed(0) + ' minutes'
+      }
+      node.warn(warnstring)
     }
     axios.get('https://developer.sepush.co.za/business/2.0/status',
       { params: options, headers }).then(function (response) {
@@ -73,7 +79,13 @@ module.exports = function (RED) {
     const url = 'https://developer.sepush.co.za/business/2.0/area'
 
     if (node.config.verbose === true) {
-      node.warn('Running function checkArea after ' + (new Date() - EskomSePushInfo.area.lastUpdate) + ' seconds')
+      let warnstring = 'Running function checkArea'
+      if (EskomSePushInfo.area.lastUpdate === null) {
+        warnstring += ' - initial run'
+      } else {
+        warnstring += ' after ' + ((new Date() - EskomSePushInfo.area.lastUpdate)/60000).toFixed(0) + ' minutes'
+      }
+      node.warn(warnstring)
     }
     if (node.config.test) {
       options.test = 'current'
@@ -130,7 +142,7 @@ module.exports = function (RED) {
     if (EskomSePushInfo.api.lastUpdate === null ||
         EskomSePushInfo.status.lastUpdate === null ||
         EskomSePushInfo.area.lastUpdate === null) {
-      node.warn('Not enough info to continue.')
+      (node.config.verbose === true) && node.warn('Not enough info to continue.')
       return
     }
 
@@ -196,11 +208,13 @@ module.exports = function (RED) {
     if (EskomSePushInfo.calc.next) {
       EskomSePushInfo.calc.next.duration = (EskomSePushInfo.calc.next.end - EskomSePushInfo.calc.next.start) / 1000
       EskomSePushInfo.calc.next.islong = EskomSePushInfo.calc.next.duration >= (4 * 3600)
+      EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.next.start - now)/1000)
     }
 
     if (EskomSePushInfo.calc.active) {
       EskomSePushInfo.calc.duration = (EskomSePushInfo.calc.end - EskomSePushInfo.calc.start) / 1000
       EskomSePushInfo.calc.islong = EskomSePushInfo.calc.duration >= (4 * 3600)
+      EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.end - now)/1000)
     }
 
     if (node.config.verbose === true) {
