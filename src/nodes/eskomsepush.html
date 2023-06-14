@@ -126,7 +126,7 @@
         <ul id="list-areas"></ul>
 
         <p>
-            Queries left: <span id="api_info">unknown/unknown</span><br />
+            Queries used: <span id="api_info">unknown/unknown</span><br />
         <input type="text" id="searchAreaText" placeholder="Area" disabled />
         <button id="searchAreaId">Search</button><br />
     </p>
@@ -166,10 +166,10 @@ see how many queries you have left.</p>
 <p>
     The input side is not needed in most cases. The node will output its status every ten minutes and won't update the information it gets from the API more 
     often. The input node however can be used to overrule this behaviour. When inserting a timestamp, the node will output the latest information it got and
-    re-calculate all fields. 
+    re-calculate all fields.
 </p>
 
-<p>There are also special strings that can be injected as payload to force updates: 
+<p>There are also special strings that can be injected as payload to force updates:
     <ul>
         <li><code>allowance</code> - for retrieving the latest API count values</li>
         <li><code>stage</code> - for retrieving the latest active load shedding stage</li>
