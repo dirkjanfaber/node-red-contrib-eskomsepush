@@ -57,7 +57,7 @@ module.exports = function (RED) {
       if (EskomSePushInfo.status.lastUpdate === null) {
         warnstring += ' - initial run'
       } else {
-        warnstring += ' after ' + ((new Date() - EskomSePushInfo.status.lastUpdate)/60000).toFixed(0) + ' minutes'
+        warnstring += ' after ' + ((new Date() - EskomSePushInfo.status.lastUpdate) / 60000).toFixed(0) + ' minutes'
       }
       node.warn(warnstring)
     }
@@ -83,7 +83,7 @@ module.exports = function (RED) {
       if (EskomSePushInfo.area.lastUpdate === null) {
         warnstring += ' - initial run'
       } else {
-        warnstring += ' after ' + ((new Date() - EskomSePushInfo.area.lastUpdate)/60000).toFixed(0) + ' minutes'
+        warnstring += ' after ' + ((new Date() - EskomSePushInfo.area.lastUpdate) / 60000).toFixed(0) + ' minutes'
       }
       node.warn(warnstring)
     }
@@ -208,13 +208,13 @@ module.exports = function (RED) {
     if (EskomSePushInfo.calc.next) {
       EskomSePushInfo.calc.next.duration = (EskomSePushInfo.calc.next.end - EskomSePushInfo.calc.next.start) / 1000
       EskomSePushInfo.calc.next.islong = EskomSePushInfo.calc.next.duration >= (4 * 3600)
-      EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.next.start - now)/1000)
+      EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.next.start - now) / 1000)
     }
 
     if (EskomSePushInfo.calc.active) {
       EskomSePushInfo.calc.duration = (EskomSePushInfo.calc.end - EskomSePushInfo.calc.start) / 1000
       EskomSePushInfo.calc.islong = EskomSePushInfo.calc.duration >= (4 * 3600)
-      EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.end - now)/1000)
+      EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.end - now) / 1000)
     }
 
     if (node.config.verbose === true) {
