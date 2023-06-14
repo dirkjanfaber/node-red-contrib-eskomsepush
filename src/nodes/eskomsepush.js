@@ -112,7 +112,11 @@ module.exports = function (RED) {
 
     // Fetching actual information takes 2 calls, so calculate how long the day lasts and see how we
     // can divide the available calls over the day
-    EskomSePushInfo.calc.sleeptime = (getMinutesLeftInDay() / ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0)
+    if ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) > 0) {
+      EskomSePushInfo.calc.sleeptime = (getMinutesLeftInDay() / ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0)
+    } else {
+      EskomSePushInfo.calc.sleeptime = 30
+    }
 
     if (EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
       checkStage(node)
@@ -214,8 +218,8 @@ module.exports = function (RED) {
       },
       calc: EskomSePushInfo.calc
     }, {
-      stage: EskomSePushInfo.status.info,
-      schedule: EskomSePushInfo.area.info
+      stage: EskomSePushInfo.status,
+      schedule: EskomSePushInfo.area
     }])
 
     // And update the status
