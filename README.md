@@ -53,6 +53,18 @@ Then you need to fill out which status to follow. This can be either _National_ 
 
 If the _test_ checkbox has been selected, test data for the specified area will be fetched instead of the actual schedule. This is useful when debugging.
 
+### Inputs
+
+The input side is not needed in most cases. The node will output its status every ten minutes and won't update the information it gets from the API more often. The input node however can be used to overrule this behaviour. When inserting a timestamp, the node will output the latest information it got and re-calculate all fields.
+
+There are also special strings that can be injected as payload to force updates:
+
+- `allowance` - for retrieving the latest API count values
+- `stage` - for retrieving the latest active load shedding stage
+- `area` - for retrieving the latest schedule information
+
+So usually there is no reason to connect anything to the input. It is only needed if you want to have more control over the node.
+
 ### Outputs
 
 The note has two outputs. In most cases, the first (upper) output will be used.
