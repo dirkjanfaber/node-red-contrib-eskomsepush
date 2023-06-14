@@ -73,46 +73,34 @@ The first output of the node outputs a boolean value and some related data. When
 
 ```
 {
-  "payload":false,
-  "LoadShedding":{
-    "schedule":{
-       "next":{
-         "start":1683561600000,
-         "end":1683570600000,
-         "type":"schedule"
-       },
-       "active":false
-    },
-    "event":{
-      "next":{
-        "start":1683561600000,
-        "end":1683570600000
-      },
-      "active":false
-    },
-    "checked":"13:35",
-    "next":{
-      "start":1683561600000,
-      "end":1683570600000,
-      "type":"schedule"
-    },
-    "active":false
+  "payload": false,
+  "stage": "0",
+  "statusselect": "capetown",
+  "api": {
+    "count": 30,
+    "limit": 50
   },
-  "stage":"5",
-  "statusselect":"capetown",
-  "api":{
-    "count":12,
-    "limit":50,
-    "lastStatusUpdate":"Mon May 08 2023 13:34:30 GMT+0200 (Central European Summer Time)",
-    "lastScheduleUpdate":"Mon May 08 2023 13:34:30 GMT+0200 (Central European Summer Time)"
+  "calc": {
+    "sleeptime": "58",
+    "stage": "0",
+    "active": false,
+    "type": "event",
+    "next": {
+      "type": "schedule",
+      "start": 1686830400000,
+      "end": 1686839400000,
+      "duration": 9000,
+      "islong": false
+    },
+    "secondstostatechange": 84912
   },
-  "\_msgid":"6e77b593b7f9eda4"
+  "_msgid": "9fa5d503c47f083e"
 }
 ```
 
-The start and end objects contain the time of next load shedding period as unix timestamps in the Javascript format (milliseconds after the epoch).
+The _start_ and _end_ objects contain the time as unix timestamp in the Javascript format (milliseconds after the epoch), while the duration is in seconds. The `msg.calc.next.islong` value is boolean and will be _true_ if the shedding lasts 4 hours or longer.
 
-The second output shows `msg.stage` and `msg.schedule`, containing the latest information as retrieved from the API. This output is mainly useful when writing your own functions and logic.
+The second output shows `msg.stage` and `msg.schedule`, containing the latest information as retrieved from the API, with the lastUpdate field added. This output is mainly useful when debugging or writing your own functions and logic.
 
 ### Status
 
