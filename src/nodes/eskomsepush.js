@@ -102,11 +102,11 @@ module.exports = function (RED) {
       })
   }
 
-  function updateSheddingStatus (node) {
+  function updateSheddingStatus (node, msg) {
     const now = new Date()
 
     // Check allowance every ten minutes
-    if (EskomSePushInfo.api.lastUpdate === null || (now.getTime() - EskomSePushInfo.api.lastUpdate.getTime()) > 600000) {
+    if ((msg && msg.payload === 'allowance' ) || EskomSePushInfo.api.lastUpdate === null || (now.getTime() - EskomSePushInfo.api.lastUpdate.getTime()) > 600000) {
       checkAllowance(node)
     }
 
@@ -130,11 +130,11 @@ module.exports = function (RED) {
       EskomSePushInfo.calc.sleeptime = 30
     }
 
-    if (EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
+    if (( msg && msg.payload === 'stage' ) || EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
       checkStage(node)
     }
 
-    if (EskomSePushInfo.area.lastUpdate === null || (now.getTime() - EskomSePushInfo.area.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
+    if (( msg && msg.payload === 'area' ) || EskomSePushInfo.area.lastUpdate === null || (now.getTime() - EskomSePushInfo.area.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
       checkArea(node)
     }
 
@@ -239,18 +239,21 @@ module.exports = function (RED) {
     // And update the status
     let fill = 'green'
     let shape = 'ring'
-    let statusText = 'Stage ' + EskomSePushInfo.calc.stage
+    let statusText = 'Stage ' + EskomSePushInfo.calc.stage + ': '
 
     if (EskomSePushInfo.calc.active) {
       fill = 'yellow'
       if (EskomSePushInfo.calc.type === 'event') {
         shape = 'dot'
       }
-      statusText += ' - ' + new Date(EskomSePushInfo.calc.start).toLocaleTimeString()
-      statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString()
+      statusText += new Date(EskomSePushInfo.calc.start).toLocaleTimeString([], {timeStyle: 'short'})
+      statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString([], {timeStyle: 'short'})
     } else {
-      statusText += ' - ' + new Date(EskomSePushInfo.calc.next.start).toLocaleTimeString()
-      statusText += ' - ' + new Date(EskomSePushInfo.calc.next.end).toLocaleTimeString()
+      if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !==  now.getUTCDate) {
+        statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleString([], {weekday: 'short'}) + ' '
+      }
+      statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleTimeString([], {timeStyle: 'short'})
+      statusText += ' - ' + new Date(EskomSePushInfo.calc.next.end).toLocaleTimeString([], {timeStyle: 'short'})
     }
 
     statusText += ' (API: ' + EskomSePushInfo.api.info.allowance.count + '/' + EskomSePushInfo.api.info.allowance.limit + ')'
@@ -269,6 +272,10 @@ module.exports = function (RED) {
     const intervalId = setInterval(function () {
       updateSheddingStatus(node)
     }, 60000)
+
+    node.on('input', function(msg) {
+      updateSheddingStatus(node, msg)
+    })
 
     node.on('close', function () {
       clearInterval(intervalId)

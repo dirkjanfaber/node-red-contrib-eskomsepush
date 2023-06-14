@@ -39,7 +39,7 @@
             test: { value: false },
             verbose: {value: false}
         },
-        inputs:0,
+        inputs:1,
         outputs:2,
         icon: "eskomsepush.svg",
         label: function() {
@@ -159,60 +159,65 @@ see how many queries you have left.</p>
 <p>Next you need to insert the correct area. Once a valid license is filled out, the API can be used for searching the correct area id. Do note that this will cost some of the daily queries. If you don&#39;t want that and you already know the id of the area, fill out the area id manually.</p>
 <p>Then you need to fill out which status to follow. This can be either <em>National</em> (eskom) or <em>Capetown</em>.</p>
 <p>If the <em>test</em> checkbox has been selected, test data for the area will be fetched instead of the actual schedule. This is useful when debugging.</p>
+<p>The <em>verbose</em> checkbox will give some additional <tt>node.warn()</tt> messages, appearing in the debug tab. This is also useful when debugging.</p>
+
+<h3 id=""inputs">Inputs</h3>
+
+<p>
+    The input side is not needed in most cases. The node will output its status every ten minutes and won't update the information it gets from the API more 
+    often. The input node however can be used to overrule this behaviour. When inserting a timestamp, the node will output the latest information it got and
+    re-calculate all fields. 
+</p>
+
+<p>There are also special strings that can be injected as payload to force updates: 
+    <ul>
+        <li><code>allowance</code> - for retrieving the latest API count values</li>
+        <li><code>stage</code> - for retrieving the latest active load shedding stage</li>
+        <li><code>area</code> - for retrieving the latest schedule information</li>
+    </ul>
+</p>
+
+<p>
+    So usually there is no reason to connect anything to the input. It is only needed if you want to have more control over the node.
+</p>
 
 <h3 id="outputs">Outputs</h3>
 
 <p>The first output of the node outputs a boolean value. When load shedding is active, the <code>msg.payload</code> will be <em>true</em>, otherwise it will be <em>false</em>. It also outputs some extra values:</p>
 
 <pre>
-{
-    "payload": false,
-    "LoadShedding": {
-        "schedule": {
-        "next": {
-            "start": 1684267200000,
-            "end": 1684276200000,
+    {
+        "payload": false,
+        "stage": "0",
+        "statusselect": "capetown",
+        "api": {
+          "count": 30,
+          "limit": 50
+        },
+        "calc": {
+          "sleeptime": "58",
+          "stage": "0",
+          "active": false,
+          "type": "event",
+          "next": {
             "type": "schedule",
+            "start": 1686830400000,
+            "end": 1686839400000,
             "duration": 9000,
             "islong": false
+          },
+          "secondstostatechange": 84912
         },
-        "active": false
-        },
-        "event": {
-        "next": {
-            "start": 1684267200000,
-            "end": 1684276200000
-        },
-        "active": false
-        },
-        "checked": "15:38",
-        "next": {
-        "start": 1684267200000,
-        "end": 1684276200000,
-        "type": "schedule",
-        "duration": 9000,
-        "islong": false
-        },
-        "active": false
-    },
-    "stage": "3",
-    "statusselect": "capetown",
-    "api": {
-        "count": 45,
-        "limit": 50,
-        "lastStatusUpdate": "Tue May 16 2023 15:38:15 GMT+0200 (Central European Summer Time)",
-        "lastScheduleUpdate": "Tue May 16 2023 15:38:15 GMT+0200 (Central European Summer Time)"
-    },
-    "_msgid": "dfa429a93a16472d"
-    }
+        "_msgid": "9fa5d503c47f083e"
+      }
 </pre>
 
 <p>The <tt>start</tt> and <tt>end</tt> objects contain the time as unix timestamp in the Javascript format (milliseconds after the epoch),
-    while the <tt>duration</tt> is in seconds. The <code>msg.LoadShedding.next.islong</code> value is boolean and will be <em>true</em> if the
+    while the <tt>duration</tt> is in seconds. The <code>msg.calc.next.islong</code> value is boolean and will be <em>true</em> if the
     shedding lasts 4 hours or longer.</p>
 
-<p>The second output shows <code>msg.stage</code> and <code>msg.schedule</code>, containing the latest information as retrieved from the API.
-This output is mainly useful when debugging or writing your own functions and logic.</p>
+<p>The second output shows <code>msg.stage</code> and <code>msg.schedule</code>, containing the latest information as retrieved from the API,
+    with the <tt>lastUpdate</tt> field added. This output is mainly useful when debugging or writing your own functions and logic.</p>
 
 <h3 id="status">Status</h3>
 
