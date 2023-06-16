@@ -18,10 +18,13 @@ module.exports = function (RED) {
     calc: {}
   }
 
-  function getMinutesLeftInDay () {
-    const currentDate = new Date()
-    const tomorrow = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
-    const timeDiff = tomorrow.getTime() - currentDate.getTime()
+  function getMinutesToAPIReset () {
+    const now = new Date()
+    const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 2, 0, 0);
+    if (now > targetTime) {
+      targetTime.setDate(targetTime.getDate() + 1);
+    }
+    const timeDiff = targetTime - now;
     const minutesLeft = Math.floor(timeDiff / (1000 * 60))
 
     return minutesLeft
@@ -122,10 +125,11 @@ module.exports = function (RED) {
       return
     }
 
-    // Fetching actual information takes 2 calls, so calculate how long the day lasts and see how we
-    // can divide the available calls over the day
+    // Fetching actual information takes 2 calls, so calculate how long until the next API count
+    // reset and divide the calls over the day. Wait at least 10 minutes between calls
     if ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) > 0) {
-      EskomSePushInfo.calc.sleeptime = (getMinutesLeftInDay() / ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0)
+      EskomSePushInfo.calc.sleeptime = (getMinutesToAPIReset() / ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0)
+      if (EskomSePushInfo.calc.sleeptime < 10) { EskomSePushInfo.calc.sleeptime = 10 }
     } else {
       EskomSePushInfo.calc.sleeptime = 30
     }
