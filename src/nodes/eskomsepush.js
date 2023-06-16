@@ -187,7 +187,10 @@ module.exports = function (RED) {
     for (const dates of EskomSePushInfo.area.info.schedule.days) {
       for (const schedule of dates.stages[EskomSePushInfo.calc.stage]) {
         const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0])
-        const ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
+        let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
+        if (ScheduleEnd < ScheduleStart) {
+          ScheduleEnd += (24 * 60 * 60 * 1000)
+        }
         if (now < ScheduleEnd) {
           BreakLoop = true
           // This schedule is either active or will be next
