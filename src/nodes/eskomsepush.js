@@ -171,6 +171,8 @@ module.exports = function (RED) {
         if (EskomSePushInfo.area.info.events[0].note.match(/Stage (\d+)/i)) {
           EskomSePushInfo.calc.stage = EskomSePushInfo.area.info.events[0].note.match(/Stage (\d+)/i)[1]
         }
+        EskomSePushInfo.calc.start = EventStart
+        EskomSePushInfo.calc.end = EventEnd
       } else {
         EskomSePushInfo.calc.next = {
           type: 'event',
@@ -185,7 +187,7 @@ module.exports = function (RED) {
     // So not just like events, where they are in UTC with an offset
     let BreakLoop = false
     for (const dates of EskomSePushInfo.area.info.schedule.days) {
-      for (const schedule of dates.stages[EskomSePushInfo.calc.stage]) {
+      for (const schedule of dates.stages[EskomSePushInfo.calc.stage-1]) {
         const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0])
         let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
         if (ScheduleEnd < ScheduleStart) {
@@ -253,8 +255,10 @@ module.exports = function (RED) {
       if (EskomSePushInfo.calc.type === 'event') {
         shape = 'dot'
       }
-      statusText += new Date(EskomSePushInfo.calc.start).toLocaleTimeString([], {timeStyle: 'short'})
-      statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString([], {timeStyle: 'short'})
+      if ( EskomSePushInfo.calc.start ) {
+        statusText += new Date(EskomSePushInfo.calc.start).toLocaleTimeString([], {timeStyle: 'short'})
+        statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString([], {timeStyle: 'short'})
+      }
     } else {
       if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !==  now.getUTCDate) {
         statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleString([], {weekday: 'short'}) + ' '
