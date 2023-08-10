@@ -185,9 +185,13 @@ module.exports = function (RED) {
 
     // Scheduled downtime has the thing that the time is in locatime
     // So not just like events, where they are in UTC with an offset
-    let BreakLoop = false
+    let BreakLoop = false;
+    let _stageIndex = 0;
+    if (EskomSePushInfo.calc.stage > 0) {
+      _stageIndex = EskomSePushInfo.calc.stage - 1
+    }
     for (const dates of EskomSePushInfo.area.info.schedule.days) {
-      for (const schedule of dates.stages[EskomSePushInfo.calc.stage-1]) {
+      for (const schedule of dates.stages[_stageIndex]) {
         const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0])
         let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
         if (ScheduleEnd < ScheduleStart) {
