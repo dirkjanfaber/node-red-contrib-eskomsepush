@@ -163,10 +163,10 @@ module.exports = function (RED) {
 
     // Are there any events going on?
     if (Object.entries(EskomSePushInfo.area.info.events).length > 0) {
-      EskomSePushInfo.calc.type = 'event'
       const EventStart = Date.parse(EskomSePushInfo.area.info.events[0].start)
       const EventEnd = Date.parse(EskomSePushInfo.area.info.events[0].end)
       if (now >= EventStart && now < EventEnd) {
+        EskomSePushInfo.calc.type = 'event'
         EskomSePushInfo.calc.active = true
         if (EskomSePushInfo.area.info.events[0].note.match(/Stage (\d+)/i)) {
           EskomSePushInfo.calc.stage = EskomSePushInfo.area.info.events[0].note.match(/Stage (\d+)/i)[1]
@@ -205,7 +205,8 @@ module.exports = function (RED) {
             EskomSePushInfo.calc.next = {
               type: 'schedule',
               start: ScheduleStart,
-              end: ScheduleEnd
+              end: ScheduleEnd,
+              stage: EskomSePushInfo.calc.stage
             }
           }
         }
@@ -218,6 +219,7 @@ module.exports = function (RED) {
       EskomSePushInfo.calc.next.duration = (EskomSePushInfo.calc.next.end - EskomSePushInfo.calc.next.start) / 1000
       EskomSePushInfo.calc.next.islong = EskomSePushInfo.calc.next.duration >= (4 * 3600)
       EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.next.start - now) / 1000)
+      EskomSePushInfo.calc.next.isHigherStage = EskomSePushInfo.calc.next.stage > EskomSePushInfo.calc.next.stage
     }
 
     if (EskomSePushInfo.calc.active) {
