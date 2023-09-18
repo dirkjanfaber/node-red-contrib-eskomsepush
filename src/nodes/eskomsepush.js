@@ -185,34 +185,43 @@ module.exports = function (RED) {
 
     // Scheduled downtime has the thing that the time is in locatime
     // So not just like events, where they are in UTC with an offset
-    let BreakLoop = false
+    let BreakLoop = false;
     for (const dates of EskomSePushInfo.area.info.schedule.days) {
-      for (const schedule of dates.stages[EskomSePushInfo.calc.stage-1]) {
-        const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0])
-        let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
-        if (ScheduleEnd < ScheduleStart) {
-          ScheduleEnd += (24 * 60 * 60 * 1000)
-        }
-        if (now < ScheduleEnd) {
-          BreakLoop = true
-          // This schedule is either active or will be next
-          if (now >= ScheduleStart) {
-            EskomSePushInfo.calc.active = true
-            EskomSePushInfo.calc.type = 'schedule'
-            EskomSePushInfo.calc.start = ScheduleStart
-            EskomSePushInfo.calc.end = ScheduleEnd
-          } else {
-            EskomSePushInfo.calc.next = {
-              type: 'schedule',
-              start: ScheduleStart,
-              end: ScheduleEnd,
-              stage: EskomSePushInfo.calc.stage
+      let stageIndex = EskomSePushInfo.calc.stage - 1;
+      if (stageIndex >= 0 && stageIndex < dates.stages.length) {
+        if(Array.isArray(dates.stages[stageIndex])) {
+          for (const schedule of dates.stages[stageIndex]) {
+            const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0]);
+            let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1]);
+            if (ScheduleEnd < ScheduleStart) {
+              ScheduleEnd += (24 * 60 * 60 * 1000);
             }
+            if (now < ScheduleEnd) {
+              BreakLoop = true;
+              // This schedule is either active or will be next
+              if (now >= ScheduleStart) {
+                EskomSePushInfo.calc.active = true;
+                EskomSePushInfo.calc.type = 'schedule';
+                EskomSePushInfo.calc.start = ScheduleStart;
+                EskomSePushInfo.calc.end = ScheduleEnd;
+              } else {
+                EskomSePushInfo.calc.next = {
+                  type: 'schedule',
+                  start: ScheduleStart,
+                  end: ScheduleEnd,
+                  stage: EskomSePushInfo.calc.stage
+                };
+              }
+            }
+            if (BreakLoop) { break; }
           }
+        } else {
+          console.warn('Not an array:', dates.stages[stageIndex]); // Warning if not an array
         }
-        if (BreakLoop) { break }
+      } else {
+        console.warn('Invalid stage index:', stageIndex); // Warning if stage index is out of bounds
       }
-      if (BreakLoop) { break }
+      if (BreakLoop) { break; }
     }
 
     if (EskomSePushInfo.calc.next) {
