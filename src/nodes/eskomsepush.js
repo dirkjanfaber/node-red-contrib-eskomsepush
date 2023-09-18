@@ -128,7 +128,7 @@ module.exports = function (RED) {
     // Fetching actual information takes 2 calls, so calculate how long until the next API count
     // reset and divide the calls over the day. Wait at least 10 minutes between calls
     if ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) > 0) {
-      EskomSePushInfo.calc.sleeptime = (getMinutesToAPIReset() / ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0)
+      EskomSePushInfo.calc.sleeptime = parseFloat((getMinutesToAPIReset() / ((EskomSePushInfo.api.info.allowance.limit - api_allowance_buffer - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0));
       if (EskomSePushInfo.calc.sleeptime < 10) { EskomSePushInfo.calc.sleeptime = 10 }
     } else {
       EskomSePushInfo.calc.sleeptime = 30
