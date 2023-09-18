@@ -37,7 +37,8 @@
             area: {value:""},
             statusselect: {value:"", validate: RED.validators.regex(/^(eskom|capetown)$/)},
             test: { value: false },
-            verbose: {value: false}
+            verbose: {value: false},
+            api_allowance_buffer: {value: 0, validate: RED.validators.regex(/^[0-9]+$/)}
         },
         inputs:1,
         outputs:2,
@@ -111,6 +112,10 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-api_allowance_buffer"><i class="fa fa-shopping-bag"></i> API allowance buffer</label>
+        <input type="text" id="node-input-api_allowance_buffer" placeholder="0">
+    </div>
+    <div class="form-row">
         <label style="min-width:190px" for="node-input-test"><i class="fa fa-volume-up"></i> Use test data</label>
         <input type="checkbox" checked id="node-input-test" style="max-width:30px">
     </div>
@@ -130,6 +135,7 @@
         <input type="text" id="searchAreaText" placeholder="Area" disabled />
         <button id="searchAreaId">Search</button><br />
     </p>
+
     </div>
     <div class="form-row" style="margin-bottom:0px;">
         <input type="checkbox" checked id="node-input-verbose" style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;">
@@ -158,6 +164,7 @@ see how many queries you have left.</p>
 <p>First you will need a <em>licence key</em>. You can get one from <a href="https://eskomsepush.gumroad.com/l/api">here</a>, by subsribing to the Free model. Note that this is for personal use only.</p>
 <p>Next you need to insert the correct area. Once a valid license is filled out, the API can be used for searching the correct area id. Do note that this will cost some of the daily queries. If you don&#39;t want that and you already know the id of the area, fill out the area id manually.</p>
 <p>Then you need to fill out which status to follow. This can be either <em>National</em> (eskom) or <em>Capetown</em>.</p>
+<p>The <i>API allowance buffer</i> allows you to reserve some daily unused API calls (so you can use your API key for other integrations too). If you don't use that, set this to _0_ (zero).</p>
 <p>If the <em>test</em> checkbox has been selected, test data for the area will be fetched instead of the actual schedule. This is useful when debugging.</p>
 <p>The <em>verbose</em> checkbox will give some additional <tt>node.warn()</tt> messages, appearing in the debug tab. This is also useful when debugging.</p>
 

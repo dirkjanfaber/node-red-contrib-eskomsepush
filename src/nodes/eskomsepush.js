@@ -126,12 +126,31 @@ module.exports = function (RED) {
     }
 
     // Fetching actual information takes 2 calls, so calculate how long until the next API count
-    // reset and divide the calls over the day. Wait at least 10 minutes between calls
-    if ((EskomSePushInfo.api.info.allowance.limit - EskomSePushInfo.api.info.allowance.count) > 0) {
-      EskomSePushInfo.calc.sleeptime = parseFloat((getMinutesToAPIReset() / ((EskomSePushInfo.api.info.allowance.limit - api_allowance_buffer - EskomSePushInfo.api.info.allowance.count) / 2)).toFixed(0));
-      if (EskomSePushInfo.calc.sleeptime < 10) { EskomSePushInfo.calc.sleeptime = 10 }
+    // reset and divide the calls over the day. Wait at least 60 minutes between calls
+    // reduce limit by api_allowance_buffer to cater for units consumed by other API calls
+    if (node.config.verbose === true) {
+      node.warn("Minutes to API Reset: " + getMinutesToAPIReset())
+    }
+    let allowanceRemaining = EskomSePushInfo.api.info.allowance.limit - node.config.api_allowance_buffer - EskomSePushInfo.api.info.allowance.count
+
+    if (allowanceRemaining > 0) {
+        EskomSePushInfo.calc.sleeptime = Math.round(getMinutesToAPIReset() / Math.ceil(allowanceRemaining / 2))
+        if (node.config.verbose === true) {
+            node.warn("API allowance limit: " + EskomSePushInfo.api.info.allowance.limit)
+            node.warn("API allowance count: " + EskomSePushInfo.api.info.allowance.count)
+            node.warn("Calculated sleeptime: " + EskomSePushInfo.calc.sleeptime)
+        }
+        if (EskomSePushInfo.calc.sleeptime < 60) {
+            EskomSePushInfo.calc.sleeptime = 60
+            if (node.config.verbose === true) {
+                node.warn("Calculated sleeptime was less than 60. Set it to 60: " + EskomSePushInfo.calc.sleeptime)
+            }
+        }
     } else {
-      EskomSePushInfo.calc.sleeptime = 30
+        EskomSePushInfo.calc.sleeptime = 120
+        if (node.config.verbose === true) {
+            node.warn("Set sleeptime to 120 since allowance count is low: " + EskomSePushInfo.calc.sleeptime)
+        }
     }
 
     if (( msg && msg.payload === 'stage' ) || EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
