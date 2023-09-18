@@ -20,11 +20,11 @@ module.exports = function (RED) {
 
   function getMinutesToAPIReset () {
     const now = new Date()
-    const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 2, 0, 0);
+    const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 2, 0, 0)
     if (now > targetTime) {
-      targetTime.setDate(targetTime.getDate() + 1);
+      targetTime.setDate(targetTime.getDate() + 1)
     }
-    const timeDiff = targetTime - now;
+    const timeDiff = targetTime - now
     const minutesLeft = Math.floor(timeDiff / (1000 * 60))
 
     return minutesLeft
@@ -109,7 +109,7 @@ module.exports = function (RED) {
     const now = new Date()
 
     // Check allowance every ten minutes
-    if ((msg && msg.payload === 'allowance' ) || EskomSePushInfo.api.lastUpdate === null || (now.getTime() - EskomSePushInfo.api.lastUpdate.getTime()) > 600000) {
+    if ((msg && msg.payload === 'allowance') || EskomSePushInfo.api.lastUpdate === null || (now.getTime() - EskomSePushInfo.api.lastUpdate.getTime()) > 600000) {
       checkAllowance(node)
     }
 
@@ -129,35 +129,35 @@ module.exports = function (RED) {
     // reset and divide the calls over the day. Wait at least 60 minutes between calls
     // reduce limit by api_allowance_buffer to cater for units consumed by other API calls
     if (node.config.verbose === true) {
-      node.warn("Minutes to API Reset: " + getMinutesToAPIReset())
+      node.warn('Minutes to API Reset: ' + getMinutesToAPIReset())
     }
-    let allowanceRemaining = EskomSePushInfo.api.info.allowance.limit - node.config.api_allowance_buffer - EskomSePushInfo.api.info.allowance.count
+    const allowanceRemaining = EskomSePushInfo.api.info.allowance.limit - node.config.api_allowance_buffer - EskomSePushInfo.api.info.allowance.count
 
     if (allowanceRemaining > 0) {
-        EskomSePushInfo.calc.sleeptime = Math.round(getMinutesToAPIReset() / Math.ceil(allowanceRemaining / 2))
+      EskomSePushInfo.calc.sleeptime = Math.round(getMinutesToAPIReset() / Math.ceil(allowanceRemaining / 2))
+      if (node.config.verbose === true) {
+        node.warn('API allowance limit: ' + EskomSePushInfo.api.info.allowance.limit)
+        node.warn('API allowance count: ' + EskomSePushInfo.api.info.allowance.count)
+        node.warn('Calculated sleeptime: ' + EskomSePushInfo.calc.sleeptime)
+      }
+      if (EskomSePushInfo.calc.sleeptime < 60) {
+        EskomSePushInfo.calc.sleeptime = 60
         if (node.config.verbose === true) {
-            node.warn("API allowance limit: " + EskomSePushInfo.api.info.allowance.limit)
-            node.warn("API allowance count: " + EskomSePushInfo.api.info.allowance.count)
-            node.warn("Calculated sleeptime: " + EskomSePushInfo.calc.sleeptime)
+          node.warn('Calculated sleeptime was less than 60. Set it to 60: ' + EskomSePushInfo.calc.sleeptime)
         }
-        if (EskomSePushInfo.calc.sleeptime < 60) {
-            EskomSePushInfo.calc.sleeptime = 60
-            if (node.config.verbose === true) {
-                node.warn("Calculated sleeptime was less than 60. Set it to 60: " + EskomSePushInfo.calc.sleeptime)
-            }
-        }
+      }
     } else {
-        EskomSePushInfo.calc.sleeptime = 120
-        if (node.config.verbose === true) {
-            node.warn("Set sleeptime to 120 since allowance count is low: " + EskomSePushInfo.calc.sleeptime)
-        }
+      EskomSePushInfo.calc.sleeptime = 120
+      if (node.config.verbose === true) {
+        node.warn('Set sleeptime to 120 since allowance count is low: ' + EskomSePushInfo.calc.sleeptime)
+      }
     }
 
-    if (( msg && msg.payload === 'stage' ) || EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
+    if ((msg && msg.payload === 'stage') || EskomSePushInfo.status.lastUpdate === null || (now.getTime() - EskomSePushInfo.status.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
       checkStage(node)
     }
 
-    if (( msg && msg.payload === 'area' ) || EskomSePushInfo.area.lastUpdate === null || (now.getTime() - EskomSePushInfo.area.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
+    if ((msg && msg.payload === 'area') || EskomSePushInfo.area.lastUpdate === null || (now.getTime() - EskomSePushInfo.area.lastUpdate) > (EskomSePushInfo.calc.sleeptime * 60000)) {
       checkArea(node)
     }
 
@@ -204,50 +204,50 @@ module.exports = function (RED) {
 
     // Scheduled downtime has the thing that the time is in locatime
     // So not just like events, where they are in UTC with an offset
-    let BreakLoop = false;
+    let BreakLoop = false
     for (const dates of EskomSePushInfo.area.info.schedule.days) {
-      let stageIndex = EskomSePushInfo.calc.stage - 1;
+      const stageIndex = EskomSePushInfo.calc.stage - 1
       if (stageIndex >= 0 && stageIndex < dates.stages.length) {
-        if(Array.isArray(dates.stages[stageIndex])) {
+        if (Array.isArray(dates.stages[stageIndex])) {
           for (const schedule of dates.stages[stageIndex]) {
-            const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0]);
-            let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1]);
+            const ScheduleStart = Date.parse(dates.date + ' ' + schedule.split('-')[0])
+            let ScheduleEnd = Date.parse(dates.date + ' ' + schedule.split('-')[1])
             if (ScheduleEnd < ScheduleStart) {
-              ScheduleEnd += (24 * 60 * 60 * 1000);
+              ScheduleEnd += (24 * 60 * 60 * 1000)
             }
             if (now < ScheduleEnd) {
-              BreakLoop = true;
+              BreakLoop = true
               // This schedule is either active or will be next
               if (now >= ScheduleStart) {
-                EskomSePushInfo.calc.active = true;
-                EskomSePushInfo.calc.type = 'schedule';
-                EskomSePushInfo.calc.start = ScheduleStart;
-                EskomSePushInfo.calc.end = ScheduleEnd;
+                EskomSePushInfo.calc.active = true
+                EskomSePushInfo.calc.type = 'schedule'
+                EskomSePushInfo.calc.start = ScheduleStart
+                EskomSePushInfo.calc.end = ScheduleEnd
               } else {
                 EskomSePushInfo.calc.next = {
                   type: 'schedule',
                   start: ScheduleStart,
                   end: ScheduleEnd,
                   stage: EskomSePushInfo.calc.stage
-                };
+                }
               }
             }
-            if (BreakLoop) { break; }
+            if (BreakLoop) { break }
           }
         } else {
-          console.warn('Not an array:', dates.stages[stageIndex]); // Warning if not an array
+          console.warn('Not an array:', dates.stages[stageIndex]) // Warning if not an array
         }
       } else {
-        console.warn('Invalid stage index:', stageIndex); // Warning if stage index is out of bounds
+        console.warn('Invalid stage index:', stageIndex) // Warning if stage index is out of bounds
       }
-      if (BreakLoop) { break; }
+      if (BreakLoop) { break }
     }
 
     if (EskomSePushInfo.calc.next) {
       EskomSePushInfo.calc.next.duration = (EskomSePushInfo.calc.next.end - EskomSePushInfo.calc.next.start) / 1000
       EskomSePushInfo.calc.next.islong = EskomSePushInfo.calc.next.duration >= (4 * 3600)
       EskomSePushInfo.calc.secondstostatechange = parseInt((EskomSePushInfo.calc.next.start - now) / 1000)
-      EskomSePushInfo.calc.next.isHigherStage = EskomSePushInfo.calc.next.stage > EskomSePushInfo.calc.next.stage
+      EskomSePushInfo.calc.next.isHigherStage = EskomSePushInfo.calc.next.stage > EskomSePushInfo.calc.stage
     }
 
     if (EskomSePushInfo.calc.active) {
@@ -285,16 +285,16 @@ module.exports = function (RED) {
       if (EskomSePushInfo.calc.type === 'event') {
         shape = 'dot'
       }
-      if ( EskomSePushInfo.calc.start ) {
-        statusText += new Date(EskomSePushInfo.calc.start).toLocaleTimeString([], {timeStyle: 'short'})
-        statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString([], {timeStyle: 'short'})
+      if (EskomSePushInfo.calc.start) {
+        statusText += new Date(EskomSePushInfo.calc.start).toLocaleTimeString([], { timeStyle: 'short' })
+        statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString([], { timeStyle: 'short' })
       }
     } else {
-      if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !==  now.getUTCDate) {
-        statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleString([], {weekday: 'short'}) + ' '
+      if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !== now.getUTCDate) {
+        statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleString([], { weekday: 'short' }) + ' '
       }
-      statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleTimeString([], {timeStyle: 'short'})
-      statusText += ' - ' + new Date(EskomSePushInfo.calc.next.end).toLocaleTimeString([], {timeStyle: 'short'})
+      statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleTimeString([], { timeStyle: 'short' })
+      statusText += ' - ' + new Date(EskomSePushInfo.calc.next.end).toLocaleTimeString([], { timeStyle: 'short' })
     }
 
     statusText += ' (API: ' + EskomSePushInfo.api.info.allowance.count + '/' + EskomSePushInfo.api.info.allowance.limit + ')'
@@ -314,7 +314,7 @@ module.exports = function (RED) {
       updateSheddingStatus(node)
     }, 60000)
 
-    node.on('input', function(msg) {
+    node.on('input', function (msg) {
       updateSheddingStatus(node, msg)
     })
 
