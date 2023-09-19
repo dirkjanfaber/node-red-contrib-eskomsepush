@@ -140,16 +140,16 @@ module.exports = function (RED) {
         node.warn('API allowance count: ' + EskomSePushInfo.api.info.allowance.count)
         node.warn('Calculated sleeptime: ' + EskomSePushInfo.calc.sleeptime)
       }
-      if (EskomSePushInfo.calc.sleeptime < 60) {
-        EskomSePushInfo.calc.sleeptime = 60
+      if (EskomSePushInfo.calc.sleeptime < 10) {
+        EskomSePushInfo.calc.sleeptime = 10
         if (node.config.verbose === true) {
-          node.warn('Calculated sleeptime was less than 60. Set it to 60: ' + EskomSePushInfo.calc.sleeptime)
+          node.warn('Calculated sleeptime was less than 10. Set it to 10: ' + EskomSePushInfo.calc.sleeptime)
         }
       }
     } else {
-      EskomSePushInfo.calc.sleeptime = 120
+      EskomSePushInfo.calc.sleeptime = 60
       if (node.config.verbose === true) {
-        node.warn('Set sleeptime to 120 since allowance count is low: ' + EskomSePushInfo.calc.sleeptime)
+        node.warn('Set sleeptime to 60 since allowance count is low: ' + EskomSePushInfo.calc.sleeptime)
       }
     }
 
