@@ -290,7 +290,7 @@ module.exports = function (RED) {
         statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString([], { timeStyle: 'short' })
       }
     } else {
-      if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !== now.getUTCDate) {
+      if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !== now.getUTCDate()) {
         statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleString([], { weekday: 'short' }) + ' '
       }
       statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleTimeString([], { timeStyle: 'short' })
