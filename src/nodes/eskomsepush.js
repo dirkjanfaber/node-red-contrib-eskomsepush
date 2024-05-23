@@ -238,7 +238,8 @@ module.exports = function (RED) {
           console.warn('Not an array:', dates.stages[stageIndex]) // Warning if not an array
         }
       } else {
-        console.warn('Invalid stage index:', stageIndex) // Warning if stage index is out of bounds
+        console.warn(`Invalid stage index: ${stageIndex}. No loadshedding going on?`) // Warning if stage index is out of bounds
+        BreakLoop = true
       }
       if (BreakLoop) { break }
     }
@@ -290,11 +291,13 @@ module.exports = function (RED) {
         statusText += ' - ' + new Date(EskomSePushInfo.calc.end).toLocaleTimeString([], { timeStyle: 'short' })
       }
     } else {
-      if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !== now.getUTCDate()) {
-        statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleString([], { weekday: 'short' }) + ' '
+      if (EskomSePushInfo.calc.next) {
+        if (new Date(EskomSePushInfo.calc.next.start).getUTCDay() !== now.getUTCDate()) {
+          statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleString([], { weekday: 'short' }) + ' '
+        }
+        statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleTimeString([], { timeStyle: 'short' })
+        statusText += ' - ' + new Date(EskomSePushInfo.calc.next.end).toLocaleTimeString([], { timeStyle: 'short' })
       }
-      statusText += new Date(EskomSePushInfo.calc.next.start).toLocaleTimeString([], { timeStyle: 'short' })
-      statusText += ' - ' + new Date(EskomSePushInfo.calc.next.end).toLocaleTimeString([], { timeStyle: 'short' })
     }
 
     statusText += ' (API: ' + EskomSePushInfo.api.info.allowance.count + '/' + EskomSePushInfo.api.info.allowance.limit + ')'
