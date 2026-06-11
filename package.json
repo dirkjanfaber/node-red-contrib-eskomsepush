@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-eskomsepush",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Node-RED interface for the Eskomsepush API",
   "scripts": {
     "build": "tsc && cp src/nodes/eskomsepush.html dist/nodes/ && cp -r src/nodes/icons dist/nodes/",
