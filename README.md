@@ -37,10 +37,10 @@ If you don't want to use API quota by searching, and you already know the id of 
 
 To fetch the area id manually, make an `areas_search` API call using your API license key `token`, a word of search `text`.  In the response returned by the API, copy the `id` value of the matching area.
 
-In the example below (on MacOS), `curl` is used to query the API and the search text value is 'ballito' (the license key token is invalid and must be replaced with a valid key).  The area id value that will be used from this example is `eskmo-15-ballitokwadukuzakwazulunatal`:
+In the example below (on MacOS), `curl` is used to query the API and the search text value is 'ballito' (the license key token is invalid and must be replaced with a valid key).
 
 ```
-% curl --location --request GET 'https://developer.sepush.co.za/business/2.0/areas_search?text=ballito' --header 'token: 2DFB82AC-46254F6E-A68B26A4-8DF1303E'
+% curl --location --request GET 'https://developer.sepush.co.za/business/3.0/areas_search?text=ballito' --header 'token: 2DFB82AC-46254F6E-A68B26A4-8DF1303E'
 {
   "areas":[
       {"id":"eskmo-15-ballitokwadukuzakwazulunatal","name":"Ballito (15)","region":"Eskom Municipal, Kwadukuza, Kwazulu-Natal"},
@@ -48,6 +48,8 @@ In the example below (on MacOS), `curl` is used to query the API and the search 
    ]
 }
 ```
+
+> **Note:** The API returns v2-style IDs with a location suffix. When entering the area id in the node, use only the first two dash-separated parts — e.g. use `eskmo-15`, not `eskmo-15-ballitokwadukuzakwazulunatal`. The node will warn you if it detects an old-style ID.
 
 Then you need to fill out which status to follow. This can be either _National_ (Eskom) or _Cape Town_.
 
@@ -114,7 +116,7 @@ a matching _schedule_.
 
 ### Documentation
 
-Documentation for the API can be found [here](https://documenter.getpostman.com/view/1296288/UzQuNk3E)
+Documentation for the API can be found [here](https://developer.sepush.co.za/business/3.0/)
 
 When quota has been exceeded:
 

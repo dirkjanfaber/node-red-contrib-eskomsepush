@@ -144,7 +144,7 @@
 </script>
 
 <script type="text/html" data-help-name="eskomsepush">
-    <h3 id=""eskomsepushapi>EskomSePush API</h3>
+    <h3 id="eskomsepushapi">EskomSePush API</h3>
 
     <p>A node for retrieving info from the EskomSePush API.</p>
 
@@ -152,23 +152,24 @@
 in South Africa as easy as possible.</p>
 <p>First you need to configure the node by entering the license key and entering
 the correct area.</p>
-<p>Once deployed, the node will fetch the data from EskomSePush every hour. As
-every fetch from the API takes 2 calls, the 50 free queries per day on a
-free account should suffice. Every ten minutes the API status is checked to
-see how many queries you have left.</p>
+<p>Once deployed, the node fetches data from EskomSePush at a dynamic interval
+calculated from your remaining daily API allowance — never more often than needed.
+Every fetch of status and schedule takes 2 API calls. Every ten minutes the
+allowance is checked to see how many queries you have left.</p>
 <p>Internally the node checks every minute if a schedule is currently active or not. It
     will also output a message on the first deployment.</p>
 
 <h3 id="configuration">Configuration</h3>
 
 <p>First you will need a <em>licence key</em>. You can get one from <a href="https://eskomsepush.gumroad.com/l/api">here</a>, by subsribing to the Free model. Note that this is for personal use only.</p>
-<p>Next you need to insert the correct area. Once a valid license is filled out, the API can be used for searching the correct area id. Do note that this will cost some of the daily queries. If you don&#39;t want that and you already know the id of the area, fill out the area id manually.</p>
+<p>Next you need to insert the correct area id. Once a valid license is filled out, the search form below can help find it — note that each search costs API quota. If you already know the id, fill it out manually.</p>
+<p>Use the short form of the area id: <code>eskmo-15</code>, not <code>eskmo-15-ballitokwadukuzakwazulunatal</code>. If you have an old-style id with a location suffix, the node will still work but will log a warning asking you to update it.</p>
 <p>Then you need to fill out which status to follow. This can be either <em>National</em> (eskom) or <em>Capetown</em>.</p>
 <p>The <i>API allowance buffer</i> allows you to reserve some daily unused API calls (so you can use your API key for other integrations too). If you don't use that, set this to _0_ (zero).</p>
 <p>If the <em>test</em> checkbox has been selected, test data for the area will be fetched instead of the actual schedule. This is useful when debugging.</p>
 <p>The <em>verbose</em> checkbox will give some additional <tt>node.warn()</tt> messages, appearing in the debug tab. This is also useful when debugging.</p>
 
-<h3 id=""inputs">Inputs</h3>
+<h3 id="inputs">Inputs</h3>
 
 <p>
     The input side is not needed in most cases. The node will output its status every ten minutes and won't update the information it gets from the API more 
@@ -253,7 +254,7 @@ a matching <em>schedule</em>.
 
 <h1 id="documentation">Documentation</h1>
 
-<p>The GitHub site for the node can be found <a href="https://github.com/dirkjanfaber/node-red-contrib-eskomsepush">here</a>, while the documentation for the API can be found <a href="https://documenter.getpostman.com/view/1296288/UzQuNk3E">here</a>.
+<p>The GitHub site for the node can be found <a href="https://github.com/dirkjanfaber/node-red-contrib-eskomsepush">here</a>, while the documentation for the API can be found <a href="https://developer.sepush.co.za/business/3.0/">here</a>.
 For issues and/or suggestions for improving the node, please use the <a href="https://github.com/dirkjanfaber/node-red-contrib-eskomsepush/issues">issue tracker</a>.</p>
 </script>
 
